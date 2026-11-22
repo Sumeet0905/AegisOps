@@ -1,0 +1,45 @@
+﻿name: Sync AegisOps to Sumeet
+
+on:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: aegisops-sync-to-sumeet
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    if: github.repository == 'Aditi-2609/AegisOps'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Fetch all branches and tags
+        run: |
+          git fetch origin \
+            '+refs/heads/*:refs/remotes/origin/*' \
+            '+refs/tags/*:refs/tags/*'
+
+      - name: Push branches and tags to Sumeet
+        env:
+          SYNC_TOKEN: ${{ secrets.SUMEETSYNC_TOKEN }}
+        run: |
+          git remote add peer \
+            "https://x-access-token:${SYNC_TOKEN}@github.com/Sumeet0905/AegisOps.git"
+
+          git push peer \
+            'refs/remotes/origin/*:refs/heads/*' \
+            'refs/tags/*:refs/tags/*'
