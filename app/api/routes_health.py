@@ -1,8 +1,11 @@
+import logging
+
 from fastapi import APIRouter, HTTPException
 
 from app.db.session import get_conn
 
-router = APIRouter()
+logger = logging.getLogger(__name__)
+router = APIRouter(tags=["health"])
 
 
 @router.get("/health")
@@ -16,5 +19,6 @@ def health_db() -> dict[str, str]:
         with get_conn() as conn:
             conn.execute("SELECT 1")
     except Exception as exc:
+        logger.exception("Database health check failed")
         raise HTTPException(status_code=503, detail="database unavailable") from exc
     return {"status": "ok", "db": "ok"}

@@ -1,4 +1,4 @@
-CREATE TABLE customers (
+CREATE TABLE IF NOT EXISTS customers (
     customer_id  TEXT PRIMARY KEY,
     name         TEXT NOT NULL,
     tier         TEXT NOT NULL DEFAULT 'standard',
@@ -6,7 +6,7 @@ CREATE TABLE customers (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
     order_id     TEXT PRIMARY KEY,
     customer_id  TEXT NOT NULL REFERENCES customers(customer_id),
     status       TEXT NOT NULL,
@@ -14,9 +14,9 @@ CREATE TABLE orders (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_orders_customer ON orders(customer_id);
+CREATE INDEX IF NOT EXISTS idx_orders_customer ON orders(customer_id);
 
-CREATE TABLE conversations (
+CREATE TABLE IF NOT EXISTS conversations (
     conversation_id TEXT PRIMARY KEY,
     customer_id     TEXT NOT NULL REFERENCES customers(customer_id),
     channel         TEXT NOT NULL,
@@ -25,7 +25,7 @@ CREATE TABLE conversations (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     message_id      BIGSERIAL PRIMARY KEY,
     conversation_id TEXT NOT NULL REFERENCES conversations(conversation_id),
     role            TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'system', 'tool')),
@@ -33,4 +33,5 @@ CREATE TABLE messages (
     modality        TEXT NOT NULL DEFAULT 'text',
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
-CREATE INDEX idx_messages_conversation ON messages(conversation_id, created_at);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation
+    ON messages(conversation_id, created_at);
